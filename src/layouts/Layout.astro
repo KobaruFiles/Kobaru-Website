@@ -38,8 +38,9 @@ const contactLink = withBase(`/${lang}/#contato`);
         if (saved === 'light' || saved === 'dark') {
           document.documentElement.setAttribute('data-theme', saved);
         }
+        // intro-seen esconde o splash na hora; intro-done destrava o scroll.
         if (sessionStorage.getItem('kobaru-intro-seen')) {
-          document.documentElement.classList.add('intro-seen');
+          document.documentElement.classList.add('intro-seen', 'intro-done');
         }
       })();
     </script>

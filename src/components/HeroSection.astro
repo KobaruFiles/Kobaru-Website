@@ -85,8 +85,36 @@ const tr = t(lang);
       readColors();
 
       const isDesktop = window.innerWidth >= 768;
-      const COUNT = isDesktop ? 34 : 16;
+      const COUNT = isDesktop ? 41 : 19;
       const REPEL_RADIUS = 100;
+      const MAX_SIZE = 11;
+
+      // Sprites pré-renderizados (um por cor): drawImage por frame é bem mais
+      // barato que traçar/preencher dois béziers por pétala por frame.
+      const SPRITE_PAD = 2;
+      let sprites: Record<string, HTMLCanvasElement> = {};
+      function makeSprite(color: string): HTMLCanvasElement {
+        const s = MAX_SIZE;
+        const px = Math.ceil((s + SPRITE_PAD) * 2 * dpr);
+        const c = document.createElement('canvas');
+        c.width = px;
+        c.height = px;
+        const sctx = c.getContext('2d')!;
+        sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        sctx.translate(s + SPRITE_PAD, s + SPRITE_PAD);
+        sctx.fillStyle = color;
+        sctx.beginPath();
+        sctx.moveTo(0, -s);
+        sctx.bezierCurveTo(s * 0.85, -s * 0.55, s * 0.85, s * 0.55, 0, s);
+        sctx.bezierCurveTo(-s * 0.85, s * 0.55, -s * 0.85, -s * 0.55, 0, -s);
+        sctx.closePath();
+        sctx.fill();
+        return c;
+      }
+      function rebuildSprites() {
+        sprites = { [pink]: makeSprite(pink), [pinkShimmer]: makeSprite(pinkShimmer) };
+      }
+      rebuildSprites();
 
       // Measure the canvas itself (CSS already stretches it to the section via inset-0)
       // rather than overriding its style, so layout stays the single source of truth.
@@ -95,7 +123,9 @@ const tr = t(lang);
       function resize() {
         width = canvas!.clientWidth;
         height = canvas!.clientHeight;
+        const prevDpr = dpr;
         dpr = Math.min(window.devicePixelRatio || 1, 2);
+        if (dpr !== prevDpr) rebuildSprites();
         canvas!.width = Math.max(1, Math.round(width * dpr));
         canvas!.height = Math.max(1, Math.round(height * dpr));
         ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -166,19 +196,17 @@ const tr = t(lang);
         }
 
         draw(ctx: CanvasRenderingContext2D, alpha: number) {
-          ctx.save();
-          ctx.translate(this.x, this.y);
-          ctx.rotate(this.rotation);
+          const sprite = sprites[this.color] ?? sprites[pink];
+          if (!sprite) return;
+          const k = this.size / MAX_SIZE;
+          const cos = Math.cos(this.rotation) * k;
+          const sin = Math.sin(this.rotation) * k;
+          // setTransform absoluto compõe translação+rotação+escala+dpr de uma vez,
+          // dispensando o par save/restore por pétala.
+          ctx.setTransform(dpr * cos, dpr * sin, -dpr * sin, dpr * cos, dpr * this.x, dpr * this.y);
           ctx.globalAlpha = alpha;
-          ctx.fillStyle = this.color;
-          const s = this.size;
-          ctx.beginPath();
-          ctx.moveTo(0, -s);
-          ctx.bezierCurveTo(s * 0.85, -s * 0.55, s * 0.85, s * 0.55, 0, s);
-          ctx.bezierCurveTo(-s * 0.85, s * 0.55, -s * 0.85, -s * 0.55, 0, -s);
-          ctx.closePath();
-          ctx.fill();
-          ctx.restore();
+          const ext = MAX_SIZE + SPRITE_PAD;
+          ctx.drawImage(sprite, -ext, -ext, ext * 2, ext * 2);
         }
       }
 
@@ -188,8 +216,15 @@ const tr = t(lang);
         petals = Array.from({ length: COUNT }, () => new Petal(true));
       }
 
+      // draw() troca o transform por pétala, então todo passe de desenho começa
+      // restaurando o transform base antes do clearRect.
+      function resetTransform() {
+        ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
       function drawStatic() {
         seed();
+        resetTransform();
         ctx!.clearRect(0, 0, width, height);
         for (const p of petals) p.draw(ctx!, p.baseAlpha * 0.6);
       }
@@ -205,18 +240,21 @@ const tr = t(lang);
 
       window.addEventListener('kobaru-theme-change', () => {
         readColors();
+        rebuildSprites();
         for (const p of petals) p.color = Math.random() > 0.5 ? pink : pinkShimmer;
         if (reduceMotion) drawStatic();
       });
 
       let lastTime = 0;
       let rafId = 0;
+      let inView = true;
 
       function frame(time: number) {
         rafId = 0;
         const dt = lastTime ? Math.min(time - lastTime, 42) / 16.6667 : 1;
         lastTime = time;
         seed();
+        resetTransform();
         ctx!.clearRect(0, 0, width, height);
         for (const p of petals) {
           const alpha = p.step(dt, mouse);
@@ -226,8 +264,12 @@ const tr = t(lang);
       }
 
       function start() {
-        if (rafId || document.hidden || reduceMotion) return;
+        if (rafId || document.hidden || !inView || reduceMotion) return;
         rafId = requestAnimationFrame(frame);
+      }
+
+      function stop() {
+        if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
       }
 
       resize();
@@ -236,13 +278,15 @@ const tr = t(lang);
       if (!reduceMotion) {
         start();
         document.addEventListener('visibilitychange', () => {
-          if (document.hidden) {
-            if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
-          } else {
-            lastTime = 0;
-            start();
-          }
+          if (document.hidden) stop();
+          else { lastTime = 0; start(); }
         });
+        // Sem isso o loop segue queimando CPU com o hero fora da tela.
+        new IntersectionObserver((entries) => {
+          inView = entries[0].isIntersecting;
+          if (inView) { lastTime = 0; start(); }
+          else stop();
+        }).observe(section);
       }
     }
   }

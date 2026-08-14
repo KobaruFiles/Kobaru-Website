@@ -10,31 +10,46 @@ const greetings: Record<string, string> = {
 const greeting = greetings[lang] ?? greetings.pt;
 
 // posições/atrasos fixos (build-time) pra cada pétala — sem aleatoriedade em runtime
-const petals = Array.from({ length: 10 }, (_, i) => ({
-  left: (i * 9.7 + 3) % 100,
+const petals = Array.from({ length: 14 }, (_, i) => ({
+  left: (i * 7.1 + 3) % 100,
   size: 9 + ((i * 7) % 10),
   duration: 7 + (i % 5),
-  delay: -(i * 1.3),
+  delay: -(i * 1.1),
   drift: i % 2 === 0 ? 1 : -1,
 }));
 ---
 
 <div class="intro-splash" id="intro-splash">
+  <!-- Pétala = wrapper (queda, translateY) + miolo (balanço, translateX):
+       duas animações de transform compostas no compositor, zero layout/paint. -->
   <div class="intro-petals" aria-hidden="true">
     {petals.map((p) => (
       <span
-        class="petal"
-        style={`left:${p.left}%; width:${p.size}px; height:${p.size}px; animation-duration:${p.duration}s, ${p.duration * 0.6}s; animation-delay:${p.delay}s, ${p.delay}s;`}
-        data-drift={p.drift}
-      ></span>
+        class="petal-fall"
+        style={`left:${p.left}%; animation-duration:${p.duration}s; animation-delay:${p.delay}s;`}
+      >
+        <span
+          class="petal"
+          style={`width:${p.size}px; height:${p.size}px; animation-duration:${p.duration * 0.6}s; animation-delay:${p.delay}s;`}
+          data-drift={p.drift}
+        ></span>
+      </span>
     ))}
   </div>
 
-  <div class="intro-content">
-    <p class="intro-kanji">桜</p>
-    <p class="intro-greeting">{greeting} · ようこそ</p>
-    <p class="intro-word">Kobaru<span>Files</span></p>
-    <div class="intro-line" aria-hidden="true"><span></span></div>
+  <!-- As duas cenas dividem a mesma célula do grid, então o conteúdo
+       permanece opticamente centrado durante a troca. -->
+  <div class="intro-stage">
+    <div class="intro-scene intro-scene-a">
+      <p class="intro-kanji" lang="ja">桜</p>
+      <p class="intro-jp" lang="ja">ようこそ</p>
+      <p class="intro-greeting">{greeting}</p>
+    </div>
+
+    <div class="intro-scene intro-scene-b">
+      <p class="intro-word">Kobaru<span>Files</span></p>
+      <div class="intro-line" aria-hidden="true"><span></span></div>
+    </div>
   </div>
 </div>
 
@@ -47,85 +62,151 @@ const petals = Array.from({ length: 10 }, (_, i) => ({
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    background: radial-gradient(ellipse at 50% 30%, var(--pink-light) 0%, var(--bg) 70%);
-    transition: opacity .7s ease, visibility .7s ease;
+    /* Luz suave no claro. No escuro NÃO usar --pink-light: o flash claro→preto
+       media Δluminância 0.822 — ofusca quem navega no escuro. Com o rosa a ~14%
+       sobre o fundo o Δ cai para 0.014. */
+    background: radial-gradient(ellipse at 50% 35%, var(--pink-light) 0%, var(--bg) 72%);
+    will-change: transform;
   }
-  .intro-splash.is-leaving {
-    opacity: 0;
-    pointer-events: none;
+  :root[data-theme="dark"] .intro-splash {
+    background: radial-gradient(ellipse at 50% 35%, var(--pink-bg-h) 0%, transparent 72%) var(--bg);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .intro-splash {
+      background: radial-gradient(ellipse at 50% 35%, var(--pink-bg-h) 0%, transparent 72%) var(--bg);
+    }
   }
 
-  .intro-petals {
+  /* Saída: a cortina desce inteira, acelerando como se caísse, e revela a home. */
+  .intro-splash.is-leaving {
+    pointer-events: none;
+    animation: introDrop 1.05s cubic-bezier(.45, 0, .75, .12) forwards;
+  }
+  @keyframes introDrop {
+    0%   { transform: translateY(0); }
+    12%  { transform: translateY(-1.4%); }   /* respira pra cima antes de cair */
+    100% { transform: translateY(101%); }
+  }
+
+  /* O conteúdo desce um pouco mais que o fundo — dá profundidade à queda. */
+  .intro-splash.is-leaving .intro-stage {
+    animation: introStageDrop 1.05s cubic-bezier(.45, 0, .75, .12) forwards;
+  }
+  @keyframes introStageDrop {
+    0%   { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(70px); opacity: 0; }
+  }
+
+  .intro-petals { position: absolute; inset: 0; }
+  .petal-fall {
     position: absolute;
-    inset: 0;
+    top: 0;
+    display: block;
+    animation-name: petalFall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    will-change: transform;
   }
   .petal {
-    position: absolute;
-    top: -8%;
     display: block;
     background: linear-gradient(135deg, var(--pink-shimmer), var(--pink));
     opacity: .55;
     border-radius: 0% 60% 0% 60%;
-    animation-name: petalFall, petalSway;
-    animation-timing-function: linear, ease-in-out;
-    animation-iteration-count: infinite, infinite;
-    animation-direction: normal, alternate;
-    transform: rotate(20deg);
+    animation-name: petalSway;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    will-change: transform;
   }
-  .petal[data-drift="-1"] { animation-direction: normal, alternate-reverse; }
+  .petal[data-drift="-1"] { animation-direction: alternate-reverse; }
 
   @keyframes petalFall {
-    0%   { top: -8%; }
-    100% { top: 108%; }
+    0%   { transform: translateY(-8vh); }
+    100% { transform: translateY(108vh); }
   }
   @keyframes petalSway {
-    0%   { margin-left: -18px; }
-    100% { margin-left: 18px; }
+    0%   { transform: translateX(-18px) rotate(12deg); }
+    100% { transform: translateX(18px) rotate(32deg); }
   }
 
-  .intro-content {
+  .intro-stage {
     position: relative;
-    text-align: center;
+    display: grid;
+    place-items: center;
     padding: 0 1.5rem;
+    text-align: center;
+  }
+  .intro-scene {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .intro-scene-a { animation: sceneOut .7s ease forwards; animation-delay: 1.85s; }
+  .intro-scene-b { opacity: 0; animation: sceneIn .8s cubic-bezier(.22,1,.36,1) forwards; animation-delay: 2.15s; }
+
+  @keyframes sceneOut {
+    0%   { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-14px); }
+  }
+  @keyframes sceneIn {
+    0%   { opacity: 0; transform: translateY(16px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
 
   .intro-kanji {
     font-family: 'Shippori Mincho', serif;
-    font-size: 1.1rem;
-    letter-spacing: .3em;
+    font-size: clamp(2.6rem, 8vw, 4rem);
+    line-height: 1;
     color: var(--pink);
     opacity: 0;
-    margin-bottom: .75rem;
-    animation: introFadeUp .8s ease forwards;
-    animation-delay: .15s;
+    margin-bottom: 1.4rem;
+    animation: kanjiIn 1.15s cubic-bezier(.22,1,.36,1) forwards;
+    animation-delay: .1s;
+  }
+
+  .intro-jp {
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 600;
+    font-size: clamp(2rem, 6.5vw, 3.1rem);
+    letter-spacing: .22em;
+    /* letter-spacing empurra o texto pra esquerda; compensa pra ficar centrado */
+    text-indent: .22em;
+    line-height: 1.2;
+    color: var(--text);
+    opacity: 0;
+    margin-bottom: .85rem;
+    animation: introFadeUp .95s cubic-bezier(.22,1,.36,1) forwards;
+    animation-delay: .55s;
   }
 
   .intro-greeting {
     font-family: 'Shippori Mincho', serif;
-    font-size: clamp(.85rem, 2vw, 1.05rem);
-    letter-spacing: .08em;
-    color: var(--text-muted);
+    font-size: clamp(.8rem, 2vw, .95rem);
+    letter-spacing: .34em;
+    text-indent: .34em;
+    text-transform: uppercase;
+    /* --text-muted (48%/38%) fica abaixo de 3:1 sobre o fundo do splash;
+       62% mede 5.1:1 no claro e 6.2:1 no escuro. */
+    color: color-mix(in srgb, var(--text) 62%, transparent);
     opacity: 0;
-    margin-bottom: 1.1rem;
-    animation: introFadeUpOut 1.9s ease forwards;
-    animation-delay: .45s;
+    animation: introFadeUp .9s ease forwards;
+    animation-delay: .95s;
   }
 
   .intro-word {
     font-family: 'Nunito', sans-serif;
     font-weight: 800;
-    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-size: clamp(1.9rem, 5.5vw, 2.8rem);
     letter-spacing: .04em;
+    line-height: 1.15;
     color: var(--text);
-    opacity: 0;
-    transform: translateY(6px) scale(.97);
-    animation: introFadeUp .8s ease forwards;
-    animation-delay: 1.3s;
   }
   .intro-word span { color: var(--pink); }
 
   .intro-line {
-    margin: 1.1rem auto 0;
+    margin-top: 1.1rem;
     width: 130px;
     height: 1px;
     background: var(--border);
@@ -136,54 +217,63 @@ const petals = Array.from({ length: 10 }, (_, i) => ({
     height: 100%;
     width: 0;
     background: var(--pink);
-    animation: introLineDraw 1s ease forwards;
-    animation-delay: 1.7s;
+    animation: introLineDraw .9s ease forwards;
+    animation-delay: 2.5s;
   }
 
-  @keyframes introFadeUp {
-    0%   { opacity: 0; transform: translateY(8px); }
+  @keyframes kanjiIn {
+    0%   { opacity: 0; transform: translateY(10px) scale(.9); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
   }
-  @keyframes introFadeUpOut {
-    0%   { opacity: 0; transform: translateY(8px); }
-    22%  { opacity: 1; transform: translateY(0); }
-    62%  { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-6px); }
+  @keyframes introFadeUp {
+    0%   { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
   @keyframes introLineDraw {
     to { width: 100%; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .petal { animation: none; display: none; }
-    .intro-kanji, .intro-greeting, .intro-word { animation: none; opacity: 1; transform: none; }
+    .petal-fall { display: none; }
+    .intro-splash.is-leaving { animation: none; opacity: 0; transition: opacity .2s linear; }
+    .intro-splash.is-leaving .intro-stage,
+    .intro-scene-a { animation: none; }
+    .intro-scene-b { animation: none; opacity: 1; }
+    .intro-scene-a { opacity: 0; }
+    .intro-kanji, .intro-jp, .intro-greeting { animation: none; opacity: 1; transform: none; }
     .intro-line span { animation: none; width: 100%; }
   }
 </style>
 
 <style is:global>
+  /* intro-seen: visita repetida, nunca mostra. intro-done: já saiu, libera o scroll.
+     O splash NÃO pode ser escondido por display:none durante a saída, senão a
+     animação de descida não chega a rodar. */
   html.intro-seen #intro-splash { display: none; }
-  html:not(.intro-seen) body:has(#intro-splash) { overflow: hidden; }
+  html:not(.intro-done) body:has(#intro-splash) { overflow: hidden; }
 </style>
 
 <script>
   const splash = document.getElementById('intro-splash');
+  const root = document.documentElement;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const EXIT_MS = 1100;
 
   if (splash && !sessionStorage.getItem('kobaru-intro-seen')) {
     let left = false;
     const leave = () => {
       if (left) return;
       left = true;
-      splash.classList.add('is-leaving');
-      document.documentElement.classList.add('intro-seen');
       sessionStorage.setItem('kobaru-intro-seen', '1');
-      setTimeout(() => splash.remove(), 750);
+      splash.classList.add('is-leaving');
+      root.classList.add('intro-done'); // libera o scroll enquanto a cortina desce
+      window.setTimeout(() => splash.remove(), reduceMotion ? 250 : EXIT_MS);
     };
 
-    const timer = setTimeout(leave, reduceMotion ? 200 : 2700);
-    splash.addEventListener('click', () => { clearTimeout(timer); leave(); });
+    const timer = window.setTimeout(leave, reduceMotion ? 200 : 3300);
+    splash.addEventListener('click', () => { window.clearTimeout(timer); leave(); });
   } else if (splash) {
+    root.classList.add('intro-done');
     splash.remove();
   }
 </script>
