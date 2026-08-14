@@ -1,10 +1,17 @@
+// Imagens em src/assets passam pelo pipeline do Astro (<Image/>): otimização,
+// hash de cache e width/height automáticos (sem CLS).
+import type { ImageMetadata } from 'astro';
+import avatar1 from '../assets/avatares/avatar-1.webp';
+import avatar2 from '../assets/avatares/avatar-2.webp';
+import avatar3 from '../assets/avatares/avatar-3.webp';
+
 export interface Produto {
   slug: string;
   nome: string;
   preco: number;
   descricao: string;
   descricaoLonga: string;
-  imagem: string;
+  imagem: ImageMetadata;
   destaque?: boolean;
 }
 
@@ -15,7 +22,7 @@ export const produtos: Produto[] = [
     preco: 0.00,
     descricao: 'Avatar VRChat completo com physbones e full-body tracking.',
     descricaoLonga: 'Avatar VRChat completo com suporte a physbones, full-body tracking e eye tracking. Inclui múltiplas expressões faciais, toggles customizáveis e otimizado para Quest.',
-    imagem: '/imagens/avatar-1.webp',
+    imagem: avatar1,
     destaque: true,
   },
   {
@@ -24,7 +31,7 @@ export const produtos: Produto[] = [
     preco: 0.00,
     descricao: 'Avatar VRChat completo com physbones e full-body tracking.',
     descricaoLonga: 'Avatar VRChat completo com suporte a physbones, full-body tracking e eye tracking. Inclui múltiplas expressões faciais, toggles customizáveis e otimizado para Quest.',
-    imagem: '/imagens/avatar-2.webp',
+    imagem: avatar2,
   },
   {
     slug: 'avatar-3',
@@ -32,7 +39,7 @@ export const produtos: Produto[] = [
     preco: 0.00,
     descricao: 'Avatar VRChat completo com physbones e full-body tracking.',
     descricaoLonga: 'Avatar VRChat completo com suporte a physbones, full-body tracking e eye tracking. Inclui múltiplas expressões faciais, toggles customizáveis e otimizado para Quest.',
-    imagem: '/imagens/avatar-3.webp',
+    imagem: avatar3,
   },
 ];
 

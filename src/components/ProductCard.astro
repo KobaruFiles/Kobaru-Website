@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import { t } from '../i18n/translations';
 import { formatarPreco } from '../data/produtos';
 import { withBase } from '../lib/url';
@@ -8,7 +10,7 @@ interface Produto {
   nome: string;
   preco: number;
   descricao: string;
-  imagem: string;
+  imagem: ImageMetadata;
   destaque?: boolean;
 }
 
@@ -20,7 +22,6 @@ interface Props {
 
 const { produto, lang, animDelay = 1 } = Astro.props;
 const tr = t(lang);
-const placeholderSrc = withBase('/placeholder.svg');
 ---
 
 <a
@@ -34,13 +35,14 @@ const placeholderSrc = withBase('/placeholder.svg');
   )}
 
   <div class="aspect-square rounded-2xl overflow-hidden mb-5 border-theme border" style="background: var(--bg-card-hover);">
-    <img
-      src={withBase(produto.imagem)}
+    <Image
+      src={produto.imagem}
       alt={produto.nome}
+      widths={[320, 480, 640]}
+      sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 360px"
       loading="lazy"
       decoding="async"
       class="img-reveal w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-      onerror={`this.src='${placeholderSrc}'; this.classList.add('img-loaded')`}
     />
   </div>
 

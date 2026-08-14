@@ -2,6 +2,7 @@
 import type { Lang } from '../i18n/translations';
 import { t } from '../i18n/translations';
 import { withBase } from '../lib/url';
+import { produtos } from '../data/produtos';
 
 interface Props {
   title: string;
@@ -24,7 +25,8 @@ const contactLink = withBase(`/${lang}/#contato`);
 // URLs absolutas para canonical/hreflang/OG — só quando o build recebe --site (CI).
 const origin = Astro.site ? Astro.site.href.replace(/\/$/, '') : '';
 const canonical = origin ? origin + langLinks[lang as Lang] : undefined;
-const ogImage = origin ? origin + withBase('/imagens/avatar-1.webp') : undefined;
+// .src da ImageMetadata já vem com o base path do build
+const ogImage = origin ? origin + produtos[0].imagem.src : undefined;
 const ogLocale = { pt: 'pt_BR', en: 'en_US', fr: 'fr_FR' }[lang as Lang] ?? 'pt_BR';
 ---
 
