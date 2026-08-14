@@ -7,6 +7,8 @@ export default defineConfig({
   i18n: {
     defaultLocale: 'pt',
     locales: ['pt', 'en', 'fr'],
-    routing: { prefixDefaultLocale: true },
+    // redirectToDefaultLocale would emit a root redirect page with a 2s meta refresh,
+    // shadowing src/pages/index.astro, which redirects instantly instead.
+    routing: { prefixDefaultLocale: true, redirectToDefaultLocale: false },
   },
 });

@@ -15,7 +15,7 @@ export const produtos: Produto[] = [
     preco: 0.00,
     descricao: 'Avatar VRChat completo com physbones e full-body tracking.',
     descricaoLonga: 'Avatar VRChat completo com suporte a physbones, full-body tracking e eye tracking. Inclui múltiplas expressões faciais, toggles customizáveis e otimizado para Quest.',
-    imagem: '/imagens/avatar-1.jpg',
+    imagem: '/imagens/avatar-1.webp',
     destaque: true,
   },
   {
@@ -24,7 +24,7 @@ export const produtos: Produto[] = [
     preco: 0.00,
     descricao: 'Avatar VRChat completo com physbones e full-body tracking.',
     descricaoLonga: 'Avatar VRChat completo com suporte a physbones, full-body tracking e eye tracking. Inclui múltiplas expressões faciais, toggles customizáveis e otimizado para Quest.',
-    imagem: '/imagens/avatar-2.jpg',
+    imagem: '/imagens/avatar-2.webp',
   },
   {
     slug: 'avatar-3',
@@ -32,7 +32,7 @@ export const produtos: Produto[] = [
     preco: 0.00,
     descricao: 'Avatar VRChat completo com physbones e full-body tracking.',
     descricaoLonga: 'Avatar VRChat completo com suporte a physbones, full-body tracking e eye tracking. Inclui múltiplas expressões faciais, toggles customizáveis e otimizado para Quest.',
-    imagem: '/imagens/avatar-3.jpg',
+    imagem: '/imagens/avatar-3.webp',
   },
 ];
 

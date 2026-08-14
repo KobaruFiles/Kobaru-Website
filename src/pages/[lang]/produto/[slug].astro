@@ -4,6 +4,7 @@ import PaymentGrid from '../../../components/PaymentGrid.astro';
 import { t } from '../../../i18n/translations';
 import { produtos, getProduto, formatarPreco } from '../../../data/produtos';
 import { productPayments, DISCORD_URL } from '../../../data/payments';
+import { withBase } from '../../../lib/url';
 
 export function getStaticPaths() {
   return ['pt', 'en', 'fr'].flatMap((lang) =>
@@ -13,9 +14,10 @@ export function getStaticPaths() {
 
 const { lang, slug } = Astro.params;
 const produto = getProduto(slug);
-if (!produto) return Astro.redirect(`/${lang}/`);
+if (!produto) return Astro.redirect(withBase(`/${lang}/`));
 
 const tr = t(lang);
+const placeholderSrc = withBase('/placeholder.svg');
 const links = productPayments[slug] ?? productPayments['avatar-1'];
 
 const gateways = [
@@ -29,7 +31,7 @@ const gateways = [
 <Layout title={`${produto.nome} · KobaruFiles`} lang={lang} slug={slug}>
   <div class="max-w-6xl mx-auto px-6 py-10">
 
-    <a href={`/${lang}/`} class="inline-flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase transition-colors duration-200 c-dim hover:c-pink mb-10">
+    <a href={withBase(`/${lang}/`)} class="inline-flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase transition-colors duration-200 c-dim hover:c-pink mb-10">
       {tr.product.back}
     </a>
 
@@ -38,10 +40,10 @@ const gateways = [
       <!-- Imagem -->
       <div class="anim aspect-square rounded-3xl overflow-hidden" style="background: var(--bg-card); border: 1px solid var(--pink-border);">
         <img
-          src={produto.imagem}
+          src={withBase(produto.imagem)}
           alt={produto.nome}
           class="img-reveal w-full h-full object-cover"
-          onerror="this.src='/placeholder.svg'; this.classList.add('img-loaded')"
+          onerror={`this.src='${placeholderSrc}'; this.classList.add('img-loaded')`}
         />
       </div>
 

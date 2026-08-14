@@ -1,6 +1,7 @@
 ---
 import type { Lang } from '../i18n/translations';
 import { t } from '../i18n/translations';
+import { withBase } from '../lib/url';
 
 interface Props {
   title: string;
@@ -13,10 +14,12 @@ const { title, description = 'KobaruFiles', lang, slug } = Astro.props;
 const tr = t(lang);
 
 const langLinks = {
-  pt: slug ? `/pt/produto/${slug}` : '/pt/',
-  en: slug ? `/en/produto/${slug}` : '/en/',
-  fr: slug ? `/fr/produto/${slug}` : '/fr/',
+  pt: withBase(slug ? `/pt/produto/${slug}/` : '/pt/'),
+  en: withBase(slug ? `/en/produto/${slug}/` : '/en/'),
+  fr: withBase(slug ? `/fr/produto/${slug}/` : '/fr/'),
 };
+const homeLink = withBase(`/${lang}/`);
+const contactLink = withBase(`/${lang}/#contato`);
 ---
 
 <!doctype html>
@@ -47,13 +50,13 @@ const langLinks = {
     <header class="site-header sticky top-0 z-20">
       <div class="max-w-6xl mx-auto px-6 py-4 flex items-center gap-6">
 
-        <a href={`/${lang}/`} class="text-base font-bold tracking-widest uppercase c-logo shrink-0 transition-colors duration-200">
+        <a href={homeLink} class="text-base font-bold tracking-widest uppercase c-logo shrink-0 transition-colors duration-200">
           KobaruFiles
         </a>
 
         <nav class="hidden sm:flex items-center gap-6 text-xs font-semibold tracking-widest uppercase">
-          <a href={`/${lang}/`} class="c-nav-link transition-colors duration-200">{tr.nav.avatars}</a>
-          <a href={`/${lang}/#contato`} class="c-nav-link transition-colors duration-200">{tr.nav.contact}</a>
+          <a href={homeLink} class="c-nav-link transition-colors duration-200">{tr.nav.avatars}</a>
+          <a href={contactLink} class="c-nav-link transition-colors duration-200">{tr.nav.contact}</a>
         </nav>
 
         <div class="flex items-center gap-1 ml-auto">
@@ -80,7 +83,7 @@ const langLinks = {
           ))}
         </select>
 
-        <button id="theme-toggle" type="button" aria-label="Alternar tema claro/escuro" class="theme-toggle-btn shrink-0"
+        <button id="theme-toggle" type="button" aria-label="Alternar tema claro/escuro" class="theme-toggle-btn shrink-0">
           <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="4"/>
             <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
@@ -142,6 +145,7 @@ const langLinks = {
         const next = current === 'dark' ? 'light' : 'dark';
         root.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);
+        window.dispatchEvent(new Event('kobaru-theme-change'));
       });
 
       const header = document.querySelector('.site-header');
@@ -325,17 +329,6 @@ const langLinks = {
   /* Override explícito escuro → mostra sol */
   :root[data-theme="dark"] .theme-toggle-btn .icon-sun { display: block; }
   :root[data-theme="dark"] .theme-toggle-btn .icon-moon { display: none; }
-
-  /* No modo claro, o fade branco do topo do hero fica pesado demais — reduz a área e a opacidade */
-  :root[data-theme="light"] .hero-edge-fade,
-  :root:not([data-theme]) .hero-edge-fade {
-    background: linear-gradient(to bottom, rgb(255 248 251 / 55%) 0%, transparent 10%, transparent 72%, var(--bg) 100%) !important;
-  }
-  @media (prefers-color-scheme: light) {
-    :root:not([data-theme]) .hero-edge-fade {
-      background: linear-gradient(to bottom, rgb(255 248 251 / 55%) 0%, transparent 10%, transparent 72%, var(--bg) 100%) !important;
-    }
-  }
 
   /* ── Cards ── */
   .site-card {

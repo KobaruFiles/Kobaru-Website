@@ -1,3 +1,23 @@
 ---
-return Astro.redirect('/pt/');
+// Astro.redirect() in static mode emits a page with a 2s meta refresh, which shows a
+// visible "Redirecting from…" interstitial. This hand-rolled page redirects instantly.
+import { withBase } from '../lib/url';
+const target = withBase('/pt/');
 ---
+
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="refresh" content={`0;url=${target}`} />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={target} />
+    <title>KobaruFiles</title>
+    <script is:inline define:vars={{ target }}>
+      location.replace(target);
+    </script>
+  </head>
+  <body>
+    <a href={target}>KobaruFiles</a>
+  </body>
+</html>

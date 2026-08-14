@@ -1,9 +1,0 @@
----
-import { produtos } from '../../data/produtos';
-
-export function getStaticPaths() {
-  return produtos.map((p) => ({ params: { slug: p.slug } }));
-}
-const { slug } = Astro.params;
-return Astro.redirect(`/pt/produto/${slug}`);
----
