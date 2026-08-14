@@ -88,12 +88,13 @@ const ogLocale = { pt: 'pt_BR', en: 'en_US', fr: 'fr_FR' }[lang as Lang] ?? 'pt_
           <a href={contactLink} class="c-nav-link transition-colors duration-200">{tr.nav.contact}</a>
         </nav>
 
-        <div class="flex items-center gap-0.5 sm:gap-1 ml-auto">
+        <!-- Idiomas: pills no desktop, combobox no mobile (a fileira de pills não cabe) -->
+        <div class="hidden sm:flex items-center gap-1 ml-auto">
           {(['pt', 'en', 'fr'] as Lang[]).map((l) => (
             <a
               href={langLinks[l]}
               class:list={[
-                'text-[10px] font-bold tracking-widest px-1.5 sm:px-2.5 py-1 rounded-full transition-all duration-200',
+                'text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full transition-all duration-200',
                 lang === l ? 'lang-active' : 'lang-inactive'
               ]}
             >
@@ -101,6 +102,16 @@ const ogLocale = { pt: 'pt_BR', en: 'en_US', fr: 'fr_FR' }[lang as Lang] ?? 'pt_
             </a>
           ))}
         </div>
+
+        <select
+          id="lang-select"
+          aria-label="Selecionar idioma"
+          class="currency-select sm:hidden ml-auto text-[10px] font-bold tracking-widest px-1.5 py-1 rounded-full transition-all duration-200 lang-inactive"
+        >
+          {(['pt', 'en', 'fr'] as Lang[]).map((l) => (
+            <option value={langLinks[l]} selected={lang === l}>{l.toUpperCase()}</option>
+          ))}
+        </select>
 
         <select
           id="currency-select"
@@ -144,6 +155,11 @@ const ogLocale = { pt: 'pt_BR', en: 'en_US', fr: 'fr_FR' }[lang as Lang] ?? 'pt_
         const select = document.getElementById('currency-select') as HTMLSelectElement | null;
         if (select) select.value = currency;
       }
+
+      const langSelect = document.getElementById('lang-select') as HTMLSelectElement | null;
+      langSelect?.addEventListener('change', () => {
+        window.location.assign(langSelect.value);
+      });
 
       const currencySelect = document.getElementById('currency-select') as HTMLSelectElement | null;
       const savedCurrency = localStorage.getItem('currency');
