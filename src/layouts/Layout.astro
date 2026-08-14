@@ -28,12 +28,15 @@ const langLinks = {
     <title>{title}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet" />
     <script is:inline>
       (function () {
         var saved = localStorage.getItem('theme');
         if (saved === 'light' || saved === 'dark') {
           document.documentElement.setAttribute('data-theme', saved);
+        }
+        if (sessionStorage.getItem('kobaru-intro-seen')) {
+          document.documentElement.classList.add('intro-seen');
         }
       })();
     </script>
@@ -67,7 +70,17 @@ const langLinks = {
           ))}
         </div>
 
-        <button id="theme-toggle" type="button" aria-label="Alternar tema claro/escuro" class="theme-toggle-btn shrink-0">
+        <select
+          id="currency-select"
+          aria-label="Selecionar moeda dos preços"
+          class="currency-select text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full transition-all duration-200 lang-inactive"
+        >
+          {(['brl', 'usd', 'eur'] as const).map((c) => (
+            <option value={c}>{c.toUpperCase()}</option>
+          ))}
+        </select>
+
+        <button id="theme-toggle" type="button" aria-label="Alternar tema claro/escuro" class="theme-toggle-btn shrink-0"
           <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="4"/>
             <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
@@ -85,6 +98,32 @@ const langLinks = {
     </main>
 
     <script>
+      import { currencyRates, formatPrice, type CurrencyCode } from '../data/currency';
+
+      function isCurrencyCode(v: string | null): v is CurrencyCode {
+        return !!v && v in currencyRates;
+      }
+
+      function applyCurrency(currency: CurrencyCode) {
+        document.querySelectorAll<HTMLElement>('.price-value[data-brl]').forEach((el) => {
+          const brl = parseFloat(el.dataset.brl || '0');
+          el.textContent = formatPrice(brl, currency);
+        });
+        const select = document.getElementById('currency-select') as HTMLSelectElement | null;
+        if (select) select.value = currency;
+      }
+
+      const currencySelect = document.getElementById('currency-select') as HTMLSelectElement | null;
+      const savedCurrency = localStorage.getItem('currency');
+      applyCurrency(isCurrencyCode(savedCurrency) ? savedCurrency : 'brl');
+
+      currencySelect?.addEventListener('change', () => {
+        const currency = currencySelect.value;
+        if (!isCurrencyCode(currency)) return;
+        localStorage.setItem('currency', currency);
+        applyCurrency(currency);
+      });
+
       document.querySelectorAll('.img-reveal').forEach((el) => {
         const img = el as HTMLImageElement;
         function show() { img.classList.add('img-loaded'); }
@@ -235,6 +274,20 @@ const langLinks = {
   .lang-active  { background: var(--pink-bg-h); color: var(--pink); border: 1px solid var(--pink-border); }
   .lang-inactive { color: var(--text-dim); border: 1px solid transparent; }
   .lang-inactive:hover { color: var(--text-muted); }
+
+  /* ── Currency select ── */
+  .currency-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23b8a3ad' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    padding-right: 18px;
+    cursor: pointer;
+  }
+  .currency-select:focus { outline: none; }
+  .currency-select option { background: var(--bg-card); color: var(--text); }
 
   /* ── Theme toggle ── */
   .theme-toggle-btn {

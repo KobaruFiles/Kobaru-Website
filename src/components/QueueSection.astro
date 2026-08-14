@@ -9,10 +9,10 @@ const { lang } = Astro.props;
 const tr = t(lang);
 
 const consultoriaGateways = [
-  { href: consultoriaPayments.mp,     label: tr.pay.mp,     color: '#009ee3' },
-  { href: consultoriaPayments.paypal, label: tr.pay.paypal, color: '#0070ba' },
-  { href: consultoriaPayments.stripe, label: tr.pay.stripe, color: '#635bff' },
-  { href: consultoriaPayments.crypto, label: tr.pay.crypto, color: '#f7931a' },
+  { href: consultoriaPayments.mp,     label: tr.pay.mp,     color: '#009ee3', icon: 'mp' as const },
+  { href: consultoriaPayments.paypal, label: tr.pay.paypal, color: '#0070ba', icon: 'paypal' as const },
+  { href: consultoriaPayments.stripe, label: tr.pay.stripe, color: '#635bff', icon: 'stripe' as const },
+  { href: consultoriaPayments.crypto, label: tr.pay.crypto, color: '#f7931a', icon: 'crypto' as const },
 ];
 ---
 
@@ -31,7 +31,7 @@ const consultoriaGateways = [
         <div>
           <p class="text-xs font-bold tracking-widest uppercase mb-1 c-dim">{tr.queue.regular}</p>
           <p class="text-3xl font-extrabold" style="color: var(--text);">
-            {tr.queue.regularPrice}<span class="text-base font-light c-dim">{tr.queue.session}</span>
+            <span class="price-value" data-brl="50">R$ 50,00</span><span class="text-base font-light c-dim">{tr.queue.session}</span>
           </p>
         </div>
         <div class="text-right">
@@ -72,7 +72,7 @@ const consultoriaGateways = [
             <span class="text-[9px] font-bold px-2 py-0.5 rounded-full btn-pink uppercase tracking-widest">{tr.queue.skip}</span>
           </div>
           <p class="text-3xl font-extrabold" style="color: var(--text);">
-            {tr.queue.priorityPrice}<span class="text-base font-light c-dim">{tr.queue.session}</span>
+            <span class="price-value" data-brl="80">R$ 80,00</span><span class="text-base font-light c-dim">{tr.queue.session}</span>
           </p>
         </div>
         <div class="text-right">

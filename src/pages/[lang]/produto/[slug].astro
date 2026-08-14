@@ -19,10 +19,10 @@ const tr = t(lang);
 const links = productPayments[slug] ?? productPayments['avatar-1'];
 
 const gateways = [
-  { href: links.mp,     label: tr.pay.mp,     color: '#009ee3' },
-  { href: links.paypal, label: tr.pay.paypal, color: '#0070ba' },
-  { href: links.stripe, label: tr.pay.stripe, color: '#635bff' },
-  { href: links.crypto, label: tr.pay.crypto, color: '#f7931a' },
+  { href: links.mp,     label: tr.pay.mp,     color: '#009ee3', icon: 'mp' as const },
+  { href: links.paypal, label: tr.pay.paypal, color: '#0070ba', icon: 'paypal' as const },
+  { href: links.stripe, label: tr.pay.stripe, color: '#635bff', icon: 'stripe' as const },
+  { href: links.crypto, label: tr.pay.crypto, color: '#f7931a', icon: 'crypto' as const },
 ];
 ---
 
