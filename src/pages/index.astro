@@ -11,6 +11,9 @@ const target = withBase('/pt/');
     <meta charset="UTF-8" />
     <meta http-equiv="refresh" content={`0;url=${target}`} />
     <meta name="robots" content="noindex" />
+    <!-- O verificador do Search Console busca a URL exata da propriedade; esta
+         página de redirect não usa o Layout, então a tag precisa estar aqui também. -->
+    <meta name="google-site-verification" content="__siIjTsGnxqsUMA_FFsPquMgsqJB6hpdObVnPDdoG4" />
     <link rel="canonical" href={target} />
     <title>KobaruFiles</title>
     <script is:inline define:vars={{ target }}>
