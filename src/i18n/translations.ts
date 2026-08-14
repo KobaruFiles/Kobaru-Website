@@ -44,7 +44,7 @@ export const ui = {
       discordQ: 'Dúvidas sobre o avatar?',
       discordLink: 'Entrar no Discord →',
     },
-    footer: '© 2025 KobaruFiles',
+    footer: '© 2026 KobaruFiles',
   },
   en: {
     nav: { avatars: 'Avatars', contact: 'Contact' },
@@ -89,7 +89,7 @@ export const ui = {
       discordQ: 'Questions about this avatar?',
       discordLink: 'Join Discord →',
     },
-    footer: '© 2025 KobaruFiles',
+    footer: '© 2026 KobaruFiles',
   },
   fr: {
     nav: { avatars: 'Avatars', contact: 'Contact' },
@@ -134,7 +134,7 @@ export const ui = {
       discordQ: 'Questions sur cet avatar ?',
       discordLink: 'Rejoindre Discord →',
     },
-    footer: '© 2025 KobaruFiles',
+    footer: '© 2026 KobaruFiles',
   },
 } as const;
 

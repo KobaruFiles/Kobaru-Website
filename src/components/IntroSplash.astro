@@ -8,35 +8,9 @@ const greetings: Record<string, string> = {
   fr: 'Bienvenue',
 };
 const greeting = greetings[lang] ?? greetings.pt;
-
-// posições/atrasos fixos (build-time) pra cada pétala — sem aleatoriedade em runtime
-const petals = Array.from({ length: 14 }, (_, i) => ({
-  left: (i * 7.1 + 3) % 100,
-  size: 9 + ((i * 7) % 10),
-  duration: 7 + (i % 5),
-  delay: -(i * 1.1),
-  drift: i % 2 === 0 ? 1 : -1,
-}));
 ---
 
 <div class="intro-splash" id="intro-splash">
-  <!-- Pétala = wrapper (queda, translateY) + miolo (balanço, translateX):
-       duas animações de transform compostas no compositor, zero layout/paint. -->
-  <div class="intro-petals" aria-hidden="true">
-    {petals.map((p) => (
-      <span
-        class="petal-fall"
-        style={`left:${p.left}%; animation-duration:${p.duration}s; animation-delay:${p.delay}s;`}
-      >
-        <span
-          class="petal"
-          style={`width:${p.size}px; height:${p.size}px; animation-duration:${p.duration * 0.6}s; animation-delay:${p.delay}s;`}
-          data-drift={p.drift}
-        ></span>
-      </span>
-    ))}
-  </div>
-
   <!-- As duas cenas dividem a mesma célula do grid, então o conteúdo
        permanece opticamente centrado durante a troca. -->
   <div class="intro-stage">
@@ -77,56 +51,22 @@ const petals = Array.from({ length: 14 }, (_, i) => ({
     }
   }
 
-  /* Saída: a cortina desce inteira, acelerando como se caísse, e revela a home. */
+  /* Saída: nada desliza como painel — a tela some num fade uniforme enquanto o
+     conteúdo sobe de leve, como se o visitante rolasse pra baixo até o hero. */
   .intro-splash.is-leaving {
     pointer-events: none;
-    animation: introDrop 1.05s cubic-bezier(.45, 0, .75, .12) forwards;
+    animation: introLeave .9s cubic-bezier(.4, 0, .2, 1) forwards;
   }
-  @keyframes introDrop {
-    0%   { transform: translateY(0); }
-    12%  { transform: translateY(-1.4%); }   /* respira pra cima antes de cair */
-    100% { transform: translateY(101%); }
+  @keyframes introLeave {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
   }
-
-  /* O conteúdo desce um pouco mais que o fundo — dá profundidade à queda. */
   .intro-splash.is-leaving .intro-stage {
-    animation: introStageDrop 1.05s cubic-bezier(.45, 0, .75, .12) forwards;
+    animation: introStageRise .9s cubic-bezier(.4, 0, .2, 1) forwards;
   }
-  @keyframes introStageDrop {
-    0%   { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(70px); opacity: 0; }
-  }
-
-  .intro-petals { position: absolute; inset: 0; }
-  .petal-fall {
-    position: absolute;
-    top: 0;
-    display: block;
-    animation-name: petalFall;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    will-change: transform;
-  }
-  .petal {
-    display: block;
-    background: linear-gradient(135deg, var(--pink-shimmer), var(--pink));
-    opacity: .55;
-    border-radius: 0% 60% 0% 60%;
-    animation-name: petalSway;
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
-    will-change: transform;
-  }
-  .petal[data-drift="-1"] { animation-direction: alternate-reverse; }
-
-  @keyframes petalFall {
-    0%   { transform: translateY(-8vh); }
-    100% { transform: translateY(108vh); }
-  }
-  @keyframes petalSway {
-    0%   { transform: translateX(-18px) rotate(12deg); }
-    100% { transform: translateX(18px) rotate(32deg); }
+  @keyframes introStageRise {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-7vh); }
   }
 
   .intro-stage {
@@ -234,7 +174,6 @@ const petals = Array.from({ length: 14 }, (_, i) => ({
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .petal-fall { display: none; }
     .intro-splash.is-leaving { animation: none; opacity: 0; transition: opacity .2s linear; }
     .intro-splash.is-leaving .intro-stage,
     .intro-scene-a { animation: none; }
@@ -257,7 +196,7 @@ const petals = Array.from({ length: 14 }, (_, i) => ({
   const splash = document.getElementById('intro-splash');
   const root = document.documentElement;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const EXIT_MS = 1100;
+  const EXIT_MS = 950;
 
   if (splash && !sessionStorage.getItem('kobaru-intro-seen')) {
     let left = false;
