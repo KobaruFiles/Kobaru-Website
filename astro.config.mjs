@@ -1,8 +1,12 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  integrations: [tailwind()],
+  // site fixo para o sitemap e URLs canônicas; o CI passa --site/--base
+  // equivalentes via flags (base vem só do CI).
+  site: 'https://kobarufiles.github.io',
+  integrations: [tailwind(), sitemap()],
   output: 'static',
   i18n: {
     defaultLocale: 'pt',

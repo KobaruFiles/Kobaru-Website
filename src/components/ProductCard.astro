@@ -38,6 +38,7 @@ const placeholderSrc = withBase('/placeholder.svg');
       src={withBase(produto.imagem)}
       alt={produto.nome}
       loading="lazy"
+      decoding="async"
       class="img-reveal w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
       onerror={`this.src='${placeholderSrc}'; this.classList.add('img-loaded')`}
     />

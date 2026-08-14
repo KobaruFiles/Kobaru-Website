@@ -167,8 +167,10 @@ const tr = t(lang);
           if (mouse) {
             const dx = this.x - mouse.x;
             const dy = this.y - mouse.y;
-            const dist = Math.hypot(dx, dy);
-            if (dist < REPEL_RADIUS && dist > 0.01) {
+            // compara distância ao quadrado; só paga a raiz dentro do raio
+            const d2 = dx * dx + dy * dy;
+            if (d2 < REPEL_RADIUS * REPEL_RADIUS && d2 > 0.0001) {
+              const dist = Math.sqrt(d2);
               const force = (1 - dist / REPEL_RADIUS) * 5.5;
               this.vx += (dx / dist) * force;
               this.vyExtra += (dy / dist) * force * 0.35;

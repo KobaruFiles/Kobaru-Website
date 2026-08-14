@@ -42,6 +42,7 @@ const gateways = [
         <img
           src={withBase(produto.imagem)}
           alt={produto.nome}
+          decoding="async"
           class="img-reveal w-full h-full object-cover"
           onerror={`this.src='${placeholderSrc}'; this.classList.add('img-loaded')`}
         />
