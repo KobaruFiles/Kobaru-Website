@@ -1,0 +1,8 @@
+---
+export function getStaticPaths() {
+  const { produtos } = await import('../../data/produtos');
+  return produtos.map((p) => ({ params: { slug: p.slug } }));
+}
+const { slug } = Astro.params;
+return Astro.redirect(`/pt/produto/${slug}`);
+---

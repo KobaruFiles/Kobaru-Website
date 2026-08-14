@@ -1,0 +1,101 @@
+---
+import { t } from '../i18n/translations';
+import PaymentGrid from './PaymentGrid.astro';
+import { queueStatus } from '../data/queue';
+import { consultoriaPayments, DISCORD_URL } from '../data/payments';
+
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const tr = t(lang);
+
+const consultoriaGateways = [
+  { href: consultoriaPayments.mp,     label: tr.pay.mp,     color: '#009ee3' },
+  { href: consultoriaPayments.paypal, label: tr.pay.paypal, color: '#0070ba' },
+  { href: consultoriaPayments.stripe, label: tr.pay.stripe, color: '#635bff' },
+  { href: consultoriaPayments.crypto, label: tr.pay.crypto, color: '#f7931a' },
+];
+---
+
+<section class="max-w-6xl mx-auto px-6 pb-24">
+  <div class="mb-6">
+    <p class="text-[10px] tracking-[0.35em] uppercase font-bold mb-1 c-dim">{tr.queue.label}</p>
+    <h2 class="text-2xl font-extrabold" style="color: var(--text);">{tr.queue.title}</h2>
+    <p class="text-sm font-light mt-1 max-w-xl c-muted">{tr.queue.desc}</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <!-- Regular -->
+    <div class="site-card rounded-3xl p-7 flex flex-col gap-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="text-xs font-bold tracking-widest uppercase mb-1 c-dim">{tr.queue.regular}</p>
+          <p class="text-3xl font-extrabold" style="color: var(--text);">
+            {tr.queue.regularPrice}<span class="text-base font-light c-dim">{tr.queue.session}</span>
+          </p>
+        </div>
+        <div class="text-right">
+          <p class="text-[10px] uppercase tracking-widest mb-0.5 c-dim">Wait</p>
+          <p class="text-sm font-bold c-muted">{tr.queue.regularWait}</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between text-[10px] uppercase tracking-widest mb-2 c-dim">
+          <span>{queueStatus.regularPosition} na fila</span>
+          <span>{queueStatus.isOpen ? '● Aberta' : '● Fechada'}</span>
+        </div>
+        <div class="w-full rounded-full h-1.5" style="background: var(--border);">
+          <div
+            class="h-1.5 rounded-full transition-all duration-1000"
+            style={`width: ${Math.min(queueStatus.regularPosition * 8, 85)}%; background: var(--text-dim);`}
+          ></div>
+        </div>
+      </div>
+
+      <a href={DISCORD_URL} class="pay-btn btn-outline w-full text-center font-bold py-3.5 rounded-2xl text-sm tracking-wide flex items-center justify-center gap-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 127.14 96.36" fill="currentColor">
+          <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+        </svg>
+        {tr.queue.regularCta}
+      </a>
+    </div>
+
+    <!-- Priority -->
+    <div class="rounded-3xl p-7 flex flex-col gap-5 relative overflow-hidden" style="background: var(--bg-card); border: 1px solid var(--pink-border);">
+      <div class="absolute top-0 left-0 right-0 h-px" style="background: linear-gradient(90deg, transparent, var(--pink-border-h), transparent);"></div>
+
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <p class="text-xs font-bold tracking-widest uppercase c-pink">{tr.queue.priority}</p>
+            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full btn-pink uppercase tracking-widest">{tr.queue.skip}</span>
+          </div>
+          <p class="text-3xl font-extrabold" style="color: var(--text);">
+            {tr.queue.priorityPrice}<span class="text-base font-light c-dim">{tr.queue.session}</span>
+          </p>
+        </div>
+        <div class="text-right">
+          <p class="text-[10px] uppercase tracking-widest mb-0.5 c-pink" style="opacity:.5;">Wait</p>
+          <p class="text-sm font-bold c-pink">{tr.queue.priorityWait}</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between text-[10px] uppercase tracking-widest mb-2 c-pink" style="opacity:.45;">
+          <span>{queueStatus.priorityPosition} na fila</span>
+          <span>{queueStatus.isOpen ? '● Aberta' : '● Fechada'}</span>
+        </div>
+        <div class="w-full rounded-full h-1.5" style="background: var(--pink-bg);">
+          <div
+            class="h-1.5 rounded-full transition-all duration-1000"
+            style={`width: ${Math.min(queueStatus.priorityPosition * 12, 30)}%; background: var(--pink);`}
+          ></div>
+        </div>
+      </div>
+
+      <PaymentGrid gateways={consultoriaGateways} gap="gap-2" py="py-3" />
+    </div>
+
+  </div>
+</section>

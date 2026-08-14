@@ -1,0 +1,56 @@
+---
+import { t } from '../i18n/translations';
+
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const tr = t(lang);
+---
+
+<section class="relative w-full overflow-hidden flex items-center justify-center" style="min-height: 92vh;">
+
+  <!-- Imagem de fundo -->
+  <div class="absolute inset-0 overflow-hidden">
+    <img
+      src="/imagens/hero-bg.gif"
+      alt=""
+      aria-hidden="true"
+      class="img-reveal w-full h-full object-cover"
+    />
+  </div>
+
+  <!-- Overlay de contraste — escurece pra legibilidade do texto -->
+  <div class="absolute inset-0 pointer-events-none" style="background: linear-gradient(180deg, rgb(9 6 8 / 60%) 0%, rgb(9 6 8 / 38%) 40%, rgb(9 6 8 / 62%) 100%);"></div>
+
+  <!-- Gradiente top/bottom para fundir com o bg da página -->
+  <div class="hero-edge-fade absolute inset-0 pointer-events-none" style="background: linear-gradient(to bottom, var(--bg) 0%, transparent 22%, transparent 72%, var(--bg) 100%);"></div>
+
+  <!-- Glow central rosa -->
+  <div class="hero-glow absolute inset-0 flex items-center justify-center pointer-events-none">
+    <div class="w-[500px] h-[240px] rounded-full" style="background: radial-gradient(ellipse, var(--pink-glow) 0%, transparent 65%);"></div>
+  </div>
+
+  <!-- Conteúdo -->
+  <div class="relative z-10 text-center px-6 py-20 md:py-28 max-w-2xl mx-auto w-full">
+    <p class="anim text-[10px] tracking-[0.4em] uppercase font-bold mb-6" style="color: rgb(249 238 243 / 75%);">{tr.hero.eyebrow}</p>
+
+    <h1 class="anim anim-d1 font-extrabold tracking-tight leading-[1.06] mb-6" style="font-size: clamp(2.4rem, 7vw, 5rem); color: #f9eef3; text-shadow: 0 2px 24px rgb(9 6 8 / 45%);">
+      {tr.hero.line1}<br/>
+      <span class="text-shimmer">{tr.hero.line2}</span>
+    </h1>
+
+    <p class="anim anim-d2 text-sm md:text-base max-w-lg mx-auto font-light leading-relaxed mb-10" style="color: rgb(249 238 243 / 82%); text-shadow: 0 1px 12px rgb(9 6 8 / 40%);">
+      {tr.hero.sub}
+    </p>
+
+    <a
+      href="#avatares"
+      class="anim anim-d3 pay-btn btn-pink inline-flex items-center gap-2 font-bold px-7 py-3.5 md:px-9 md:py-4 rounded-full text-xs md:text-sm tracking-widest uppercase"
+    >
+      {tr.hero.cta}
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+      </svg>
+    </a>
+  </div>
+
+</section>

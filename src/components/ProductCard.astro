@@ -1,0 +1,50 @@
+---
+import { t } from '../i18n/translations';
+import { formatarPreco } from '../data/produtos';
+
+interface Produto {
+  slug: string;
+  nome: string;
+  preco: number;
+  descricao: string;
+  imagem: string;
+  destaque?: boolean;
+}
+
+interface Props {
+  produto: Produto;
+  lang: string;
+  animDelay?: number;
+}
+
+const { produto, lang, animDelay = 1 } = Astro.props;
+const tr = t(lang);
+---
+
+<a
+  href={`/${lang}/produto/${produto.slug}`}
+  class:list={['site-card group relative rounded-3xl p-5 md:p-7 flex flex-col anim', `anim-d${animDelay}`]}
+>
+  {produto.destaque && (
+    <span class="badge-feat absolute top-5 right-5 text-[9px] font-bold tracking-[0.22em] uppercase px-2.5 py-1 rounded-full">
+      {tr.card.featured}
+    </span>
+  )}
+
+  <div class="aspect-square rounded-2xl overflow-hidden mb-5 border-theme border" style="background: var(--bg-card-hover);">
+    <img
+      src={produto.imagem}
+      alt={produto.nome}
+      loading="lazy"
+      class="img-reveal w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+      onerror="this.src='/placeholder.svg'; this.classList.add('img-loaded')"
+    />
+  </div>
+
+  <h2 class="font-bold text-lg mb-1.5 transition-colors duration-200" style="color: var(--text);">{produto.nome}</h2>
+  <p class="text-sm mb-5 leading-relaxed flex-1 font-light c-muted">{produto.descricao}</p>
+  <div class="flex items-center justify-between">
+    <p class="text-xl font-extrabold" style="color: var(--text);">{formatarPreco(produto.preco)}</p>
+    <span class="text-[11px] font-bold tracking-widest uppercase c-dim group-hover:c-pink transition-colors">{tr.card.see}</span>
+  </div>
+</a>

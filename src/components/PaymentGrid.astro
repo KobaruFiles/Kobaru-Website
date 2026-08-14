@@ -1,0 +1,29 @@
+---
+interface Gateway {
+  href: string;
+  label: string;
+  color: string;
+}
+
+interface Props {
+  gateways: Gateway[];
+  gap?: string;
+  py?: string;
+}
+
+const { gateways, gap = 'gap-2.5', py = 'py-3.5' } = Astro.props;
+---
+
+<div class={`grid grid-cols-2 ${gap}`}>
+  {gateways.map(({ href, label, color }) => (
+    <a
+      href={href}
+      class={`pay-btn text-center font-bold ${py} rounded-2xl text-xs tracking-wide`}
+      style={`background:${color}14; border:1px solid ${color}28; color:${color}bb;`}
+      onmouseover={`this.style.background='${color}22'; this.style.borderColor='${color}55'; this.style.color='${color}';`}
+      onmouseout={`this.style.background='${color}14'; this.style.borderColor='${color}28'; this.style.color='${color}bb';`}
+    >
+      {label}
+    </a>
+  ))}
+</div>

@@ -1,0 +1,403 @@
+---
+import type { Lang } from '../i18n/translations';
+import { t } from '../i18n/translations';
+
+interface Props {
+  title: string;
+  description?: string;
+  lang: string;
+  slug?: string;
+}
+
+const { title, description = 'KobaruFiles', lang, slug } = Astro.props;
+const tr = t(lang);
+
+const langLinks = {
+  pt: slug ? `/pt/produto/${slug}` : '/pt/',
+  en: slug ? `/en/produto/${slug}` : '/en/',
+  fr: slug ? `/fr/produto/${slug}` : '/fr/',
+};
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+    <script is:inline>
+      (function () {
+        var saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') {
+          document.documentElement.setAttribute('data-theme', saved);
+        }
+      })();
+    </script>
+  </head>
+
+  <body class="site-body min-h-screen flex flex-col font-sans antialiased">
+
+    <header class="site-header sticky top-0 z-20">
+      <div class="max-w-6xl mx-auto px-6 py-4 flex items-center gap-6">
+
+        <a href={`/${lang}/`} class="text-base font-bold tracking-widest uppercase c-logo shrink-0 transition-colors duration-200">
+          KobaruFiles
+        </a>
+
+        <nav class="hidden sm:flex items-center gap-6 text-xs font-semibold tracking-widest uppercase">
+          <a href={`/${lang}/`} class="c-nav-link transition-colors duration-200">{tr.nav.avatars}</a>
+          <a href={`/${lang}/#contato`} class="c-nav-link transition-colors duration-200">{tr.nav.contact}</a>
+        </nav>
+
+        <div class="flex items-center gap-1 ml-auto">
+          {(['pt', 'en', 'fr'] as Lang[]).map((l) => (
+            <a
+              href={langLinks[l]}
+              class:list={[
+                'text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full transition-all duration-200',
+                lang === l ? 'lang-active' : 'lang-inactive'
+              ]}
+            >
+              {l.toUpperCase()}
+            </a>
+          ))}
+        </div>
+
+        <button id="theme-toggle" type="button" aria-label="Alternar tema claro/escuro" class="theme-toggle-btn shrink-0">
+          <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+          <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <script>
+      document.querySelectorAll('.img-reveal').forEach((el) => {
+        const img = el as HTMLImageElement;
+        function show() { img.classList.add('img-loaded'); }
+        if (img.complete) show();
+        else {
+          img.addEventListener('load', show);
+          img.addEventListener('error', show);
+        }
+      });
+
+      const themeBtn = document.getElementById('theme-toggle');
+      themeBtn?.addEventListener('click', () => {
+        const root = document.documentElement;
+        const current = root.getAttribute('data-theme')
+          || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const next = current === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+
+      const header = document.querySelector('.site-header');
+      if (header) {
+        let ticking = false;
+        const updateHeader = () => {
+          header.classList.toggle('is-scrolled', window.scrollY > 40);
+          ticking = false;
+        };
+        window.addEventListener('scroll', () => {
+          if (!ticking) {
+            requestAnimationFrame(updateHeader);
+            ticking = true;
+          }
+        }, { passive: true });
+        updateHeader();
+      }
+    </script>
+
+    <footer class="site-footer mt-16">
+      <div class="max-w-6xl mx-auto px-6 py-7 text-[11px] text-center tracking-widest uppercase font-semibold c-dim">
+        {tr.footer}
+      </div>
+    </footer>
+
+  </body>
+</html>
+
+<style is:global>
+  /* ── Colour tokens ── */
+  :root {
+    /* Light (default) — branco blush derivado de #fce4ef */
+    --bg:              #fff8fb;
+    --bg-card:         #ffffff;
+    --bg-card-hover:   #fef2f7;
+    --text:            #1c0910;
+    --text-muted:      rgb(28 9 16 / 48%);
+    --text-dim:        rgb(28 9 16 / 22%);
+    --border:          rgb(28 9 16 / 7%);
+    --pink:            #bf4068;
+    --pink-light:      #fce4ef;
+    --pink-shimmer:    #e0789e;
+    --pink-glow:       rgb(191 64 104 / 16%);
+    --pink-border:     rgb(191 64 104 / 18%);
+    --pink-border-h:   rgb(191 64 104 / 36%);
+    --pink-bg:         rgb(191 64 104 / 6%);
+    --pink-bg-h:       rgb(191 64 104 / 12%);
+    --header-bg:       rgb(255 248 251 / 90%);
+    --header-bg-top:   rgb(255 248 251 / 0%);
+    --header-border:   rgb(28 9 16 / 6%);
+  }
+
+  /* Dark — preto quase puro, detalhes rosa */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:              #090608;
+      --bg-card:         #130810;
+      --bg-card-hover:   #1b0c15;
+      --text:            #f9eef3;
+      --text-muted:      rgb(249 238 243 / 38%);
+      --text-dim:        rgb(249 238 243 / 16%);
+      --border:          rgb(249 238 243 / 5%);
+      --pink:            #f4b8cf;
+      --pink-light:      #fce4ef;
+      --pink-shimmer:    #f091b4;
+      --pink-glow:       rgb(244 184 207 / 22%);
+      --pink-border:     rgb(244 184 207 / 13%);
+      --pink-border-h:   rgb(244 184 207 / 28%);
+      --pink-bg:         rgb(244 184 207 / 9%);
+      --pink-bg-h:       rgb(244 184 207 / 16%);
+      --header-bg:       rgb(9 6 8 / 90%);
+      --header-bg-top:   rgb(9 6 8 / 0%);
+      --header-border:   rgb(249 238 243 / 5%);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:              #090608;
+    --bg-card:         #130810;
+    --bg-card-hover:   #1b0c15;
+    --text:            #f9eef3;
+    --text-muted:      rgb(249 238 243 / 38%);
+    --text-dim:        rgb(249 238 243 / 16%);
+    --border:          rgb(249 238 243 / 5%);
+    --pink:            #f4b8cf;
+    --pink-light:      #fce4ef;
+    --pink-shimmer:    #f091b4;
+    --pink-glow:       rgb(244 184 207 / 22%);
+    --pink-border:     rgb(244 184 207 / 13%);
+    --pink-border-h:   rgb(244 184 207 / 28%);
+    --pink-bg:         rgb(244 184 207 / 7%);
+    --pink-bg-h:       rgb(244 184 207 / 13%);
+    --header-bg:       rgb(9 6 8 / 90%);
+    --header-bg-top:   rgb(9 6 8 / 0%);
+    --header-border:   rgb(249 238 243 / 5%);
+  }
+
+  /* ── Base ── */
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); }
+
+  /* ── Semantic colour utilities ── */
+  /* Topo do header é transparente, então logo/nav seguem o tema da página (visível sobre o hero) */
+  .c-logo      { color: var(--pink); }
+  .c-logo:hover { color: var(--pink-shimmer); }
+  .c-nav-link  { color: var(--text-dim); }
+  .c-nav-link:hover { color: var(--pink); }
+  .c-muted     { color: var(--text-muted); }
+  .c-dim       { color: var(--text-dim); }
+  .c-pink      { color: var(--pink); }
+  .c-pink-l    { color: var(--pink-light); }
+
+  /* ── Header / footer ── */
+  .site-body    { background: var(--bg); color: var(--text); }
+  .site-header  {
+    background: var(--header-bg-top);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    border-bottom: 1px solid transparent;
+    transition: background .35s ease, border-color .35s ease, backdrop-filter .35s ease;
+  }
+  .site-header.is-scrolled {
+    background: var(--header-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom-color: var(--header-border);
+  }
+  .site-footer  { border-top: 1px solid var(--border); }
+
+  /* ── Lang switcher ── */
+  .lang-active  { background: var(--pink-bg-h); color: var(--pink); border: 1px solid var(--pink-border); }
+  .lang-inactive { color: var(--text-dim); border: 1px solid transparent; }
+  .lang-inactive:hover { color: var(--text-muted); }
+
+  /* ── Theme toggle ── */
+  .theme-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    margin-left: 6px;
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    background: transparent;
+    transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease;
+  }
+  .theme-toggle-btn:hover {
+    color: var(--pink);
+    border-color: var(--pink-border);
+    background: var(--pink-bg);
+    transform: rotate(14deg);
+  }
+  .theme-toggle-btn .icon-sun,
+  .theme-toggle-btn .icon-moon { display: none; }
+
+  /* Padrão (sem OS dark, sem override) = claro → mostra lua (clique vai pra escuro) */
+  :root:not([data-theme]) .theme-toggle-btn .icon-moon,
+  :root[data-theme="light"] .theme-toggle-btn .icon-moon { display: block; }
+
+  /* OS dark sem override = escuro → mostra sol (clique vai pra claro) */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-toggle-btn .icon-sun { display: block; }
+    :root:not([data-theme="light"]) .theme-toggle-btn .icon-moon { display: none; }
+  }
+
+  /* Override explícito escuro → mostra sol */
+  :root[data-theme="dark"] .theme-toggle-btn .icon-sun { display: block; }
+  :root[data-theme="dark"] .theme-toggle-btn .icon-moon { display: none; }
+
+  /* No modo claro, o fade branco do topo do hero fica pesado demais — reduz a área e a opacidade */
+  :root[data-theme="light"] .hero-edge-fade,
+  :root:not([data-theme]) .hero-edge-fade {
+    background: linear-gradient(to bottom, rgb(255 248 251 / 55%) 0%, transparent 10%, transparent 72%, var(--bg) 100%) !important;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme]) .hero-edge-fade {
+      background: linear-gradient(to bottom, rgb(255 248 251 / 55%) 0%, transparent 10%, transparent 72%, var(--bg) 100%) !important;
+    }
+  }
+
+  /* ── Cards ── */
+  .site-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    transition:
+      transform .38s cubic-bezier(.22,1,.36,1),
+      box-shadow .38s ease,
+      border-color .38s ease,
+      background .38s ease;
+  }
+  .site-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--pink-border-h);
+    transform: translateY(-7px);
+    box-shadow: 0 24px 56px -12px var(--pink-glow);
+  }
+
+  /* ── Buttons / pay ── */
+  .pay-btn {
+    transition: transform .2s ease, box-shadow .2s ease, border-color .22s ease, background .22s ease, color .22s ease;
+  }
+  .pay-btn:hover  { transform: translateY(-2px); box-shadow: 0 8px 22px -4px var(--pink-glow); }
+  .pay-btn:active { transform: translateY(0); }
+
+  .btn-outline {
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    background: transparent;
+  }
+  .btn-outline:hover {
+    border-color: var(--pink-border);
+    background: var(--pink-bg);
+    color: var(--pink);
+  }
+
+  .btn-pink {
+    background: var(--pink-bg);
+    border: 1px solid var(--pink-border);
+    color: var(--pink);
+  }
+  .btn-pink:hover {
+    background: var(--pink-bg-h);
+    border-color: var(--pink-border-h);
+  }
+
+  /* Badge de destaque — mais visível que btn-pink */
+  .badge-feat {
+    background: var(--pink-bg-h);
+    border: 1px solid var(--pink-border-h);
+    color: var(--pink);
+  }
+
+  /* Image fade-in on load */
+  .img-reveal {
+    opacity: 0;
+    transition: opacity 0.65s ease;
+  }
+  .img-reveal.img-loaded { opacity: 1; }
+
+  /* ── Dividers ── */
+  .border-theme { border-color: var(--border); }
+  .border-pink-theme { border-color: var(--pink-border); }
+
+  /* ── Nav underline slide ── */
+  nav a { position: relative; }
+  nav a::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: -2px;
+    width: 0; height: 1.5px;
+    background: var(--pink);
+    transition: width .25s ease;
+  }
+  nav a:hover::after { width: 100%; }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes glowPulse {
+    0%,100% { opacity: .28; transform: scale(1); }
+    50%     { opacity: .52; transform: scale(1.07); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -260% center; }
+    100% { background-position: 260% center; }
+  }
+
+  .anim    { animation: fadeUp .65s cubic-bezier(.22,1,.36,1) both; }
+  .anim-d1 { animation-delay: .08s; }
+  .anim-d2 { animation-delay: .16s; }
+  .anim-d3 { animation-delay: .24s; }
+  .anim-d4 { animation-delay: .32s; }
+  .anim-d5 { animation-delay: .40s; }
+
+  .hero-glow { animation: glowPulse 8s ease-in-out infinite; }
+
+  .text-shimmer {
+    background: linear-gradient(90deg,
+      var(--pink-shimmer) 0%,
+      var(--pink-light)   30%,
+      var(--pink)         55%,
+      var(--pink-light)   72%,
+      var(--pink-shimmer) 100%);
+    background-size: 260% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 6s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .anim, .text-shimmer, .hero-glow { animation: none !important; }
+    .site-card, .pay-btn, .theme-toggle-btn { transition: none !important; }
+  }
+</style>

@@ -1,0 +1,83 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import PaymentGrid from '../../../components/PaymentGrid.astro';
+import { t } from '../../../i18n/translations';
+import { produtos, getProduto, formatarPreco } from '../../../data/produtos';
+import { productPayments, DISCORD_URL } from '../../../data/payments';
+
+export function getStaticPaths() {
+  return ['pt', 'en', 'fr'].flatMap((lang) =>
+    produtos.map((p) => ({ params: { lang, slug: p.slug } }))
+  );
+}
+
+const { lang, slug } = Astro.params;
+const produto = getProduto(slug);
+if (!produto) return Astro.redirect(`/${lang}/`);
+
+const tr = t(lang);
+const links = productPayments[slug] ?? productPayments['avatar-1'];
+
+const gateways = [
+  { href: links.mp,     label: tr.pay.mp,     color: '#009ee3' },
+  { href: links.paypal, label: tr.pay.paypal, color: '#0070ba' },
+  { href: links.stripe, label: tr.pay.stripe, color: '#635bff' },
+  { href: links.crypto, label: tr.pay.crypto, color: '#f7931a' },
+];
+---
+
+<Layout title={`${produto.nome} · KobaruFiles`} lang={lang} slug={slug}>
+  <div class="max-w-6xl mx-auto px-6 py-10">
+
+    <a href={`/${lang}/`} class="inline-flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase transition-colors duration-200 c-dim hover:c-pink mb-10">
+      {tr.product.back}
+    </a>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-14 items-start">
+
+      <!-- Imagem -->
+      <div class="anim aspect-square rounded-3xl overflow-hidden" style="background: var(--bg-card); border: 1px solid var(--pink-border);">
+        <img
+          src={produto.imagem}
+          alt={produto.nome}
+          class="img-reveal w-full h-full object-cover"
+          onerror="this.src='/placeholder.svg'; this.classList.add('img-loaded')"
+        />
+      </div>
+
+      <!-- Info -->
+      <div class="anim anim-d1 flex flex-col">
+        {produto.destaque && (
+          <span class="btn-pink text-[9px] font-bold tracking-[0.25em] uppercase px-3 py-1 rounded-full w-fit mb-5">
+            {tr.card.featured}
+          </span>
+        )}
+
+        <h1 class="text-4xl font-extrabold leading-tight mb-2" style="color: var(--text);">{produto.nome}</h1>
+
+        <p class="text-3xl font-extrabold mb-7 text-shimmer" style="-webkit-text-fill-color: unset; background: none; color: var(--pink);">
+          {formatarPreco(produto.preco)}
+        </p>
+
+        <p class="leading-relaxed mb-8 font-light text-sm c-muted">{produto.descricaoLonga}</p>
+
+        <!-- Payment selector -->
+        <div class="rounded-3xl p-5 mb-0" style="background: var(--bg-card); border: 1px solid var(--border);">
+          <p class="text-[10px] font-bold tracking-[0.3em] uppercase mb-4 c-dim">{tr.pay.title}</p>
+          <PaymentGrid gateways={gateways} />
+          <p class="text-[10px] text-center mt-4 tracking-widest uppercase font-bold c-dim">
+            {tr.pay.secure}
+          </p>
+        </div>
+
+        <div class="mt-6 text-center">
+          <p class="text-xs font-light mb-2 c-dim">{tr.product.discordQ}</p>
+          <a href={DISCORD_URL} class="text-xs font-semibold tracking-wide transition-colors duration-200 c-dim hover:c-pink">
+            {tr.product.discordLink}
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</Layout>
